@@ -47,6 +47,7 @@ class _TodoListState extends State<TodoList> {
 
                           todos.add(newTodo);
                         });
+                        todoInputController.clear();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff00d7f3),
