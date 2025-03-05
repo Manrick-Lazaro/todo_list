@@ -12,6 +12,9 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   List<Todo> todos = [];
 
+  Todo? todoDeleated;
+  int? todoDeleatedPosition;
+
   final TextEditingController todoInputController = TextEditingController();
 
   @override
@@ -75,10 +78,16 @@ class _TodoListState extends State<TodoList> {
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: Text("Você possui 0 tarefas pendentes.")),
+                    Expanded(
+                      child: Text(
+                        "Você possui ${todos.length} tarefas pendentes.",
+                      ),
+                    ),
                     SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        dialogClearList();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff00d7f3),
                         padding: EdgeInsets.all(14),
@@ -101,9 +110,99 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
+  void dialogClearList() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text("Remover todas as tarefas"),
+            content: Text(
+              "Voce têm certeza que deseja remover todas as tarefas?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Cancelar",
+                  style: TextStyle(color: Color(0xff00d7f3)),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  onClearList();
+                  Navigator.of(context).pop();
+                },
+                child: Text("Confirmar", style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+  }
+
   void onDelete(Todo todo) {
+    Todo todoDeleted = todo;
+    int todoPositionDeleted = todos.indexOf(todo);
+
     setState(() {
       todos.remove(todo);
     });
+
+    showSnackBar(
+      todoDeleted: todoDeleted,
+      todoPositionDeleted: todoPositionDeleted,
+    );
+  }
+
+  void onClearList() {
+    List<Todo> todosCopy = [...todos];
+
+    setState(() {
+      todos.clear();
+    });
+
+    showSnackBar(todosDeleted: todosCopy);
+  }
+
+  void showSnackBar({
+    Todo? todoDeleted,
+    int? todoPositionDeleted,
+    List<Todo>? todosDeleted,
+  }) {
+    List<Todo> todosCopy = [];
+
+    if (todosDeleted != null) {
+      todosCopy = [...todosDeleted];
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          todoDeleted != null
+              ? "A tarefa '${todoDeleted.title}' foi removida com sucesso!"
+              : "${todosCopy.length} tarefas foram removidas com sucesso!",
+          style: TextStyle(color: Color(0xff060708)),
+        ),
+        backgroundColor: Colors.white,
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: "Desfazer",
+          textColor: Color(0xff00d7f3),
+          onPressed: () {
+            setState(() {
+              if (todoDeleted != null) {
+                todos.insert(todoPositionDeleted!, todoDeleted);
+              }
+
+              if (todosDeleted != null) {
+                todos = [...todosCopy];
+              }
+            });
+          },
+        ),
+      ),
+    );
   }
 }
