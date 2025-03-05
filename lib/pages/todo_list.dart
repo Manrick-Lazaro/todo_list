@@ -39,7 +39,6 @@ class _TodoListState extends State<TodoList> {
                     SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
-                        String todo = todoInputController.text;
                         setState(() {
                           if (todoInputController.text != "") {
                             Todo newTodo = Todo(
