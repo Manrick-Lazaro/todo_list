@@ -42,8 +42,9 @@ class _TodoListState extends State<TodoList> {
                         String todo = todoInputController.text;
                         setState(() {
                           Todo newTodo = Todo(
-                              title: todoInputController.text,
-                              dateTime: DateTime.now());
+                            title: todoInputController.text,
+                            dateTime: DateTime.now(),
+                          );
 
                           todos.add(newTodo);
                         });
@@ -66,7 +67,7 @@ class _TodoListState extends State<TodoList> {
                     shrinkWrap: true,
                     children: [
                       for (Todo todo in todos)
-                        TodoListItem(todo: todo),
+                        TodoListItem(todo: todo, onDelete: onDelete),
                     ],
                   ),
                 ),
@@ -97,5 +98,11 @@ class _TodoListState extends State<TodoList> {
         ),
       ),
     );
+  }
+
+  void onDelete(Todo todo) {
+    setState(() {
+      todos.remove(todo);
+    });
   }
 }
