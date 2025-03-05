@@ -41,12 +41,14 @@ class _TodoListState extends State<TodoList> {
                       onPressed: () {
                         String todo = todoInputController.text;
                         setState(() {
-                          Todo newTodo = Todo(
-                            title: todoInputController.text,
-                            dateTime: DateTime.now(),
-                          );
+                          if (todoInputController.text != "") {
+                            Todo newTodo = Todo(
+                              title: todoInputController.text,
+                              dateTime: DateTime.now(),
+                            );
 
-                          todos.add(newTodo);
+                            todos.add(newTodo);
+                          }
                         });
                         todoInputController.clear();
                       },
