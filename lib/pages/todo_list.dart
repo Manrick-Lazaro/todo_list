@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/models/todo.dart';
+import 'package:todo_list/repositories/todo_repository.dart';
 import 'package:todo_list/widgets/todo_list_item.dart';
 
 class TodoList extends StatefulWidget {
@@ -14,8 +15,21 @@ class _TodoListState extends State<TodoList> {
 
   Todo? todoDeleated;
   int? todoDeleatedPosition;
+  String? errorInput;
 
   final TextEditingController todoInputController = TextEditingController();
+  final TodoRepository todoRepository = TodoRepository();
+
+  @override
+  void initState() {
+    super.initState();
+
+    todoRepository.loadTodoList().then((value) {
+      setState(() {
+        todos = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +50,11 @@ class _TodoListState extends State<TodoList> {
                           border: OutlineInputBorder(),
                           labelText: "Adicione um Tarefa",
                           hintText: "Ex: Estudando flutter...",
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xff00d7f3)),
+                          ),
+                          labelStyle: TextStyle(color: Color(0xff00d7f3)),
+                          errorText: errorInput,
                         ),
                       ),
                     ),
@@ -44,12 +63,17 @@ class _TodoListState extends State<TodoList> {
                       onPressed: () {
                         setState(() {
                           if (todoInputController.text != "") {
+                            errorInput = null;
                             Todo newTodo = Todo(
                               title: todoInputController.text,
                               dateTime: DateTime.now(),
                             );
 
                             todos.add(newTodo);
+                            todoRepository.saveTodoList(todos);
+                          } else {
+                            errorInput =
+                                "Não é permitido adicionar uma tarefa vazia.";
                           }
                         });
                         todoInputController.clear();
@@ -153,6 +177,8 @@ class _TodoListState extends State<TodoList> {
       todoDeleted: todoDeleted,
       todoPositionDeleted: todoPositionDeleted,
     );
+
+    todoRepository.saveTodoList(todos);
   }
 
   void onClearList() {
@@ -163,6 +189,8 @@ class _TodoListState extends State<TodoList> {
     });
 
     showSnackBar(todosDeleted: todosCopy);
+
+    todoRepository.saveTodoList(todos);
   }
 
   void showSnackBar({
@@ -194,10 +222,12 @@ class _TodoListState extends State<TodoList> {
             setState(() {
               if (todoDeleted != null) {
                 todos.insert(todoPositionDeleted!, todoDeleted);
+                todoRepository.saveTodoList(todos);
               }
 
               if (todosDeleted != null) {
                 todos = [...todosCopy];
+                todoRepository.saveTodoList(todos);
               }
             });
           },
